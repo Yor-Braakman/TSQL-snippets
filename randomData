@@ -1,0 +1,45 @@
+with vw_number_generator (incrementor) as (SELECT [value] AS incrementor FROM GENERATE_SERIES(1, 100000))
+,vw_all_days_of_this_year ([date]) as (
+SELECT DATEADD(DAY, vw_number_generator.[incrementor], convert(date,convert(varchar,year(getdate()))+ '01' +'01' ))
+FROM   vw_number_generator
+WHERE  DATEADD(DAY, vw_number_generator.[incrementor], convert(date,convert(varchar,year(getdate()))+ '01' +'01' )) <= convert(date,convert(varchar,year(getdate()))+ '12' +'31' )
+)
+,vw_special_dates ([date]) as (
+SELECT NULL union all
+select convert(date,convert(varchar,year(getdate()))+ '01' +'01' ) union all  --first day of the year
+select convert(date,getdate()	) union all --today
+select convert(date,getdate()-1) union all --yesterday
+select convert(date,getdate()+1) union all --tomorrow
+select convert(date,convert(varchar,year(getdate()))+ '12' +'25' ) union all  --christmas
+select convert(date,convert(varchar,year(getdate()))+ '12' +'26' ) union all  --christmas
+select convert(date,convert(varchar,year(getdate()))+ '12' +'31' ) union all  --last day of the year
+select convert(date,'20240229') union all									  --next leapyear
+select convert(date,'20200229') union all									  --previous leapyear
+select convert(date,getdate()+18*365) union all								  --almost 18 years ago (minor)
+select convert(date,getdate()+18*366) --union all							  --more than 18 years ago (adult)
+)
+,vw_date ([value]) as (select date from vw_all_days_of_this_year union all select date from vw_special_dates)
+,vw_time ([value]) as (
+select '00:00:00.000' union all 
+select '01:00:00.000' union all 
+select '09:00:00.000' union all 
+select '12:00:00.000' union all 
+select '17:00:00.000' union all 
+select '23:59:59.996' union all
+--select '23:59:59.999' union all --in a datetime this is the next day, use datetime2 for more precision
+select null
+)
+,vw_datetime ([value]) as (
+select DATEADD(DAY, DATEDIFF(DAY, 0, date), vw_time.[value])
+from vw_all_days_of_this_year cross join vw_time where date is not null and vw_time.[value] is not null)
+,vw_nvarchar ([value]) as (select nchar(ABS(CONVERT(SMALLINT,CONVERT(VARBINARY,NEWID())))) UNION ALL select NULL)
+,vw_varchar ([value]) as (select   char(ABS(CONVERT(SMALLINT,CONVERT(VARBINARY,NEWID())))) UNION ALL select NULL)
+,vw_bigint ([value]) as (SELECT CONVERT(BIGINT,CONVERT(VARBINARY,NEWID())) UNION ALL SELECT NULL)
+,vw_bit ([value]) as (select 0 union all select 1 union all select null)
+,vw_decimal ([value]) as (select 1.1234567890123456 union select -1.1234567890123456 union select null)
+,vw_int ([value]) as (SELECT CONVERT(INT,CONVERT(VARBINARY,NEWID())) UNION ALL SELECT NULL)
+,vw_smallint ([value]) as (SELECT CONVERT(SMALLINT,CONVERT(VARBINARY,NEWID())) UNION ALL SELECT NULL)
+,vw_tinyint ([value]) as (SELECT CONVERT(TINYINT,CONVERT(VARBINARY,NEWID())) UNION ALL SELECT NULL)
+,vw_uniqueidentifier ([value]) as (select newid() union all select null)
+,vw_varbinary ([value]) as (select convert(varbinary,newid()) union all select null)
+,vw_binary ([value]) as (select convert(binary,newid()) union all select null)
