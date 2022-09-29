@@ -1,0 +1,20 @@
+DECLARE @GiantString NVARCHAR(MAX) = (Select @tsqlstatement)
+DECLARE @CurrentEnd BIGINT, /* track the length of the next substring */
+        @offset tinyint /*tracks the amount of offset needed */
+SET @GiantString = replace(replace(@GiantString, char(13)+char(10), char(10)), char(13), char(10))
+WHILE LEN(@GiantString) > 1
+BEGIN
+    IF CHARINDEX(CHAR(10), @GiantString) between 1 AND 4000
+    BEGIN
+           SET @CurrentEnd =  CHARINDEX(char(10), @GiantString) -1
+           set @offset = 2
+    END
+    ELSE
+    BEGIN
+		SET @CurrentEnd = (4000 - charindex(char(44),reverse(substring(@GiantString, 1, 4000)))) --search for last comma, for clean line endings
+        set @offset = 1
+    END   
+    PRINT SUBSTRING(@GiantString, 1, @CurrentEnd) 
+    set @GiantString = SUBSTRING(@GiantString, @CurrentEnd+@offset, 1073741822)
+END
+
