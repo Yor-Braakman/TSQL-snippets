@@ -20,7 +20,7 @@ BEGIN
             when ISNUMERIC(@input) = 1 and try_convert(smallint, @input) is not null                                                                                    then '12 smallint'
             when ISNUMERIC(@input) = 1 and try_convert(int, @input) is not null                                                                                         then '13 int'
             when ISNUMERIC(@input) = 1 and try_convert(bigint, @input) is not null                                                                                      then '14 bigint'
-            else CONCAT('00 nvarchar(', ISNULL(ceiling(max(len(@input)) over (partition by @input) / 50.0), 1) * 50,')')
+            else CONCAT('99 nvarchar(', ISNULL(ceiling(max(len(@input)) over (partition by @input) / 50.0), 1) * 50,')')
         END
     RETURN @return
 END
