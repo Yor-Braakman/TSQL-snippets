@@ -1,0 +1,26 @@
+CREATE OR ALTER FUNCTION dbo.TestDataType (
+    @input AS nvarchar(4000)
+)
+RETURNS NVARCHAR(20) AS
+BEGIN
+    DECLARE @return nvarchar(20)
+    SELECT @return =
+            CASE 
+            when ISDATE(@input) = 1  AND try_convert(date,@input) is not null and TRY_CONVERT(datetime2, @input) <> try_convert(date,@input)                            then '20 date'
+            when ISDATE(@input) = 1  AND try_convert(time,@input) is not null and TRY_CONVERT(datetime2, @input) <>  try_convert(datetime2, try_convert(time ,@input))  then '21 time'
+            when ISDATE(@input) = 1  AND try_convert(datetime2,@input) is not null                                                                                      then '22 datetime2'
+            when try_convert(datetimeoffset,@input) is not null                                                                                                         then '23 datetimeoffset'
+            when ISNUMERIC(@input) = 1 and patindex('%.%', @input) > 0 and len(@input) <= 10                                                                            then concat('15 decimal(9, ',len(@input) - patindex(@input, '%.%'),')')
+            when ISNUMERIC(@input) = 1 and patindex('%.%', @input) > 0 and len(@input) <= 20                                                                            then concat('16 decimal(19,',case when len(@input) - patindex('%.%', @input) > 16 then 16 else len(@input) - patindex('%.%', @input) END,')')
+            when ISNUMERIC(@input) = 1 and patindex('%.%', @input) > 0 and len(@input) <= 29                                                                            then concat('17 decimal(28,',case when len(@input) - patindex('%.%', @input) > 16 then 16 else len(@input) - patindex('%.%', @input) END,')')
+            when ISNUMERIC(@input) = 1 and patindex('%.%', @input) > 0 and len(@input) <= 39                                                                            then concat('18 decimal(38,',case when len(@input) - patindex('%.%', @input) > 16 then 16 else len(@input) - patindex('%.%', @input) END,')')
+            when ISNUMERIC(@input) = 1 and patindex('%.%', @input) > 0 and try_convert(float(53), @input) is not null                                                   then '19 float(53)'                   
+            when @input in ('0','1', 'true', 'false')                                                                                                                   then '10 bit'
+            when ISNUMERIC(@input) = 1 and try_convert(tinyint, @input) is not null                                                                                     then '11 tinyint'
+            when ISNUMERIC(@input) = 1 and try_convert(smallint, @input) is not null                                                                                    then '12 smallint'
+            when ISNUMERIC(@input) = 1 and try_convert(int, @input) is not null                                                                                         then '13 int'
+            when ISNUMERIC(@input) = 1 and try_convert(bigint, @input) is not null                                                                                      then '14 bigint'
+            else CONCAT('00 nvarchar(', ISNULL(ceiling(max(len(@input)) over (partition by @input) / 50.0), 1) * 50,')')
+        END
+    RETURN @return
+END
