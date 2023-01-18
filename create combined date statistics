@@ -1,0 +1,11 @@
+/* having 2 columns in a single statistics object can improve estimates in queries with a range comparison like WHERE GETDATE() BETWEEN validfrom AND validto */
+declare @tsql nvarchar(max) 
+SELECT @tsql = string_agg(cmd,char(10))
+
+FROM (select concat('create statistics stats_',TABLE_SCHEMA,'_',TABLE_NAME,'_validfromto on ',TABLE_SCHEMA,'.',TABLE_NAME,'(',STRING_AGG(COLUMN_NAME,','),');') as cmd
+      from INFORMATION_SCHEMA.COLUMNS
+      where TABLE_NAME like '%FO_%' /*or use TABLE_SCHEMA to do it for a whole schema*/
+        and COLUMN_NAME in ('validfrom', 'validto') /*rename to whatever your date_from date_to is*/
+      group by TABLE_SCHEMA,TABLE_NAME
+) as subqueries
+execute sys.sp_executesql @tsql
