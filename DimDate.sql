@@ -14,7 +14,8 @@ SELECT
     [Month Name] = CONVERT(VARCHAR(20), FORMAT(DATEADD(DAY, [value], GETDATE()), 'MMMM')),
     [Last Day Of Month] = CONVERT(DATE, EOMONTH(DATEADD(DAY, [value], GETDATE()))),
     [Week Number] = DATEPART(WEEK, DATEADD(DAY, [value], GETDATE())),
-    [Day Number In Week] = DATEPART(WEEKDAY, DATEADD(DAY, [value], GETDATE())),
+    --[Day Number In Week] = DATEPART(WEEKDAY, DATEADD(DAY, [value], GETDATE())), --use this if your week starts on sunday
+    [Day Number In Week] = (DATEPART(WEEKDAY, DATEADD(DAY, [value], GETDATE())) + @@DATEFIRST - 2) % 7 + 1,
     [Day Number In Month] = DAY(DATEADD(DAY, [value], GETDATE())),
     [Day Number In Year] = DATEPART(DAYOFYEAR, DATEADD(DAY, [value], GETDATE())),
     [Workday] = CONVERT(VARCHAR(20), CASE WHEN DATENAME(WEEKDAY, DATEADD(DAY, [value], GETDATE())) IN ('Saturday', 'Sunday') THEN 'No' ELSE 'Yes' END),
