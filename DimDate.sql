@@ -12,7 +12,7 @@ SELECT
     [Year Week] = CONVERT(VARCHAR(10), CONCAT(YEAR(DATEADD(DAY, [value], GETDATE())), '-W', DATEPART(WEEK, DATEADD(DAY, [value], GETDATE())))),
     [Month Number] = MONTH(DATEADD(DAY, [value], GETDATE())),
     [Month Name] = CONVERT(VARCHAR(20), FORMAT(DATEADD(DAY, [value], GETDATE()), 'MMMM')),
-    [Last Day Of Month] = CONVERT(DATE), EOMONTH(DATEADD(DAY, [value], GETDATE()))),
+    [Last Day Of Month] = CONVERT(DATE, EOMONTH(DATEADD(DAY, [value], GETDATE()))),
     [Week Number] = DATEPART(WEEK, DATEADD(DAY, [value], GETDATE())),
     [Day Number In Week] = DATEPART(WEEKDAY, DATEADD(DAY, [value], GETDATE())),
     [Day Number In Month] = DAY(DATEADD(DAY, [value], GETDATE())),
