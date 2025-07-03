@@ -9,7 +9,17 @@ SELECT
     [Year Month] = CONVERT(VARCHAR(10), CONCAT(YEAR(DATEADD(DAY, [value], GETDATE())), '-', FORMAT(DATEADD(DAY, [value], GETDATE()), 'MM'))),
     [Year Month Int] = CONVERT(INT, CONCAT(YEAR(DATEADD(DAY, [value], GETDATE())), FORMAT(DATEADD(DAY, [value], GETDATE()), 'MM'))),
     [Year Quarter] = CONVERT(VARCHAR(10), CONCAT(YEAR(DATEADD(DAY, [value], GETDATE())), '-Q', DATEPART(QUARTER, DATEADD(DAY, [value], GETDATE())))),
-    [Year Week] = CONVERT(VARCHAR(10), CONCAT(YEAR(DATEADD(DAY, [value], GETDATE())), '-W', DATEPART(WEEK, DATEADD(DAY, [value], GETDATE())))),
+        [Year Week] = 
+    CONCAT(
+        YEAR(DATEADD(DAY, [value], GETDATE())),
+        '-W',
+        RIGHT('0' + CAST(DATEPART(ISO_WEEK, DATEADD(DAY, [value], GETDATE())) AS VARCHAR(2)), 2)
+    ),
+    [Year Week Int] = 
+    CONVERT(INT, CONCAT(
+        YEAR(DATEADD(DAY, [value], GETDATE())),
+        RIGHT('0' + CAST(DATEPART(ISO_WEEK, DATEADD(DAY, [value], GETDATE())) AS VARCHAR(2)), 2)
+    )),
     [Month Number] = MONTH(DATEADD(DAY, [value], GETDATE())),
     [Month Name] = CONVERT(VARCHAR(20), FORMAT(DATEADD(DAY, [value], GETDATE()), 'MMMM')),
     [Last Day Of Month] = CONVERT(DATE, EOMONTH(DATEADD(DAY, [value], GETDATE()))),
